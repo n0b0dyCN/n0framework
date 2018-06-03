@@ -1,10 +1,10 @@
 import requests
 import Queue
 import threading
-import config
 from time import sleep
 
 
+from . import config
 
 class Flag:
     def __init__(self, flag, ip, port, payload):
@@ -26,7 +26,6 @@ class Submitter(threading.Thread):
         self.isrun = False
 
     def submit(self, flag):
-        print "[submit] "
         url = "https://www.n0b0dycn.me"
         data = {
             "flag":flag.flag,
@@ -49,12 +48,9 @@ class Submitter(threading.Thread):
         while self.isrun:
             try:
                 if self.flagq.empty():
-                    print "empty"
                     sleep(3)
                 else:
-                    print "Not empty"
                     flag = self.flagq.get()
-                    print "[*] ", flag.flag
                     self.submit(flag)
             except Exception as e:
                 msg = str(e)

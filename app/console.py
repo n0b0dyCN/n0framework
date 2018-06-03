@@ -1,61 +1,92 @@
-import imp
-import os
-import sys
-import config
-import re
-import requests
+#-*- coding:utf-8 -*-
 
-def getExps():
-    explist = []
-    for f in os.listdir(config.EXP_PATH):
-        if os.path.isfile(config.EXP_PATH + os.sep + f):
-            if f[-3:] == ".py":
-                explist.append(f[:-3])
-    return explist
+import signal
+import cmd
+from prettytable import PrettyTable
 
-def importExp(exp_name):
-    f, fpath, desc = imp.find_module(exp_name, config.EXP_PATH)
-    try:
-        mod = imp.load_module(exp_name, f, fpath, desc)
-        return mod
-    except ImportError as e:
-        return None
-    except Exception as e:
-        return None
+from core import util, submitter
 
-def genIPList(ips):
-    try:
-        ip_pattern = "^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])(.\d{1,2}|1\d\d|2[0-4]\d|25[0-5]){3}$"
-        ip_re = re.compile(ip_pattern)
-        if "-" not in ips:
-            if ip_re.match(ips) != None:
-                return [ips]
-            else:
-                return []
+class ExpManager(cmd.Cmd):
+    def __init__(self, conf):
+        cmd.Cmd.__init__(self)
+        self.prompt = "➜ "
 
-        parts = ips.split(".")
-        if len(parts) != 4:
-            return []
-        pl = []
-        for part in parts:
-            if "-" in part:
-                s, e = part.split("-")
-                s = int(s)
-                e = int(e)
-                pl.append(range(s, e+1))
-            else:
-                pl.append([int(part)])
+        self.cfg = util.getConfig(conf)
 
-        ret = []
-        for A in pl[0]:
-            for B in pl[1]:
-                for C in pl[2]:
-                    for D in pl[3]:
-                        ret.append(
-                            "{A}.{B}.{C}.{D}".format(A=A,B=B,C=C,D=D)
-                        )
+        self.flag_submitter = submitter.Submitter()
+        self.flag_submitter.setDaemon(True)
+        self.flag_submitter.start()
 
-        return ret
-    except Exception as e:
-        return []
+        self.gameboxs = []
+        self.exps = []
 
+    
+    def preloop(self):
+        banner = """
+        N0Framework
+        Powered by n0b0dy@Eur3kA
+        """
+        print banner
+
+    def postloop(self):
+        pass
+
+    def do_exit(self, arg):
+        self.flag_submitter.stop()
+        return True
+
+    def help_exit(self):
+        print "Exit."
+
+    def do_loadGameboxs(self, arg):
+        self.gameboxs = util.getGameboxs(self.cfg)
+
+    def help_loadGameboxs(self):
+        print "Load gamebox information."
+
+    def do_showGameboxs(self, arg):
+        util.printGameboxs(self.gameboxs)
+
+    def help_showGameboxs(self):
+        print "Show gameboxs information."
+
+    def do_loadExps(self, arg):
+        self.exps = util.loadAllExps()
+
+    def help_loadExps(self):
+        print "Load all exploits."
+
+    def do_showExps(self, arg):
+        util.printExps(self.exps)
+
+    def help_showExps(self):
+        print "Show exploits information."
+
+    def do_reloadExp(self, arg):
+        if arg == '':
+            # if no exp specified, reload all exps.
+            self.exps[:] = []
+            self.do_loadExps(arg)
+        else:
+            reload_exps = [e for e in arg.split(" ") if e != ""]
+            if len(reload_exps) > 0:
+                for exp_name in reload_exps:
+                    for e in self.exps:
+                        if util.getExpNameByPath(e.fname) == exp_name:
+                            self.exps.remove(e)
+                            break
+                    obj = util.loadExp(exp)
+                    if obj:
+                        self.exps.append(exp)
+ 
+    def help_reloadExp(self):
+        print "Reload specific exps (seperated with space) if arg given, or reload all."
+        print "Examples:"
+        print "To reload exp1 and exp2: `reloadExp exp1 exp2`"
+        print "To reload all exps: `reload`"
+
+
+
+if __name__ == "__main__":
+    cmd = ExpManager("/app/game.cfg")
+    cmd.cmdloop()
