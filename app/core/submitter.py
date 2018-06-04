@@ -4,8 +4,6 @@ import threading
 from time import sleep
 
 
-from . import config
-
 class Flag:
     def __init__(self, flag, ip, port, payload):
         self.flag = str(flag)
@@ -14,10 +12,11 @@ class Flag:
         self.payload = payload
 
 class Submitter(threading.Thread):
-    def __init__(self):
+    def __init__(self, token=""):
         threading.Thread.__init__(self,name="Submitter")
         self.flagq = Queue.Queue()
         self.isrun = True
+        self.token = token
 
     def correct_flag(self, r):
         return True
@@ -29,7 +28,7 @@ class Submitter(threading.Thread):
         url = "https://www.n0b0dycn.me"
         data = {
             "flag":flag.flag,
-            "token":config.FLAG_TOKEN
+            "token":self.token
         }
         r = requests.post(url, data=data)
         report(flag, self.correct_flag(r.text))
@@ -40,9 +39,9 @@ class Submitter(threading.Thread):
         else:
             msg = "Attack {ip}:{port} with payload {payload} failed.".format(ip=flag.ip, port=flag.port, payload=payload)
 
-    def add(self, flag):
-        print "Flag added."
-        self.flagq.put(flag)
+    def add(self, flag, ip, port, payload):
+        f = Flag(flag ,ip, port, payload)
+        self.flagq.put(f)
 
     def run(self):
         while self.isrun:
