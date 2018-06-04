@@ -22,6 +22,7 @@ root@626d325b64af:/app# ./console.py
 * Attack all with one command.
 
 ## TODO
-* Restructure util.py and split the file accroding to different usage of functions
-* Set parameters to attack instruction to attack certain gamebox using certain exploit
-* Auto select exploit for gamebox
+* Restructure util.py and split the file accroding to different usage of functions.
+* Set parameters to attack instruction to attack certain gamebox using certain exploit.
+* Auto select exploit for gamebox.
+* Add logger to every class.
