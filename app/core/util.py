@@ -2,6 +2,8 @@ import os
 import sys
 import re
 import requests
+import logging
+
 
 def genIPList(ips):
     try:
@@ -46,3 +48,15 @@ def safeGetAttr(x, attr):
     else:
         return None
 
+
+def getLog(name):
+    log = logging.getLogger("n0framework.{name}".format(name=name))
+    log.setLevel(logging.DEBUG)
+
+    handler = logging.FileHandler("/framelog/{name}.log".format(name=name))
+    handler.setLevel(logging.INFO)
+    formatter = logging.Formatter(fmt="%(asctime)s - %(levelname)s - %(message)s",
+                                 datefmt="%m/%d/%Y %H:%M:%S %p")
+    handler.setFormatter(formatter)
+    log.addHandler(handler)
+    return log

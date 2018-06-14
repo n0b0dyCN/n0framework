@@ -2,7 +2,7 @@ from ConfigParser import ConfigParser
 from prettytable import PrettyTable
 
 
-from .util import safeGetAttr
+from .util import safeGetAttr, getLog
 
 class Gamebox:
     def __init__(self, name, ip, port, in_ip, in_port,
@@ -32,6 +32,8 @@ class GameboxManager:
         self.cfg = ConfigParser()
         self.cfg.read(confpath)
         self.gameboxs = []
+
+        self.logger = getLog("gameboxmanager")
 
     def loadGameboxs(self):
         secs = self.cfg.sections()

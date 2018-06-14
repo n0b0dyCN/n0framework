@@ -7,8 +7,11 @@ RUN apt-get -y install git \
 				build-essential
 
 RUN pip install --upgrade pip
-RUN pip install flask requests prettytable pwntools
+RUN pip install requests prettytable pwntools pycrypto zio
 
+RUN pip install flask
+
+VOLUME /framelog
 VOLUME /app
 WORKDIR /app
 CMD ["/bin/bash"]

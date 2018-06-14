@@ -2,6 +2,8 @@ import requests
 import Queue
 import threading
 from time import sleep
+import logging
+from .util import getLog
 
 
 class Flag:
@@ -17,11 +19,13 @@ class Submitter(threading.Thread):
         self.flagq = Queue.Queue()
         self.isrun = True
         self.token = token
+        self.logger = getLog("submitter")
 
     def correct_flag(self, r):
-        return True
+        return {"status":"correct"}
 
     def stop(self):
+        self.logger.info("Submitter stop.")
         self.isrun = False
 
     def submit(self, flag):
@@ -31,19 +35,21 @@ class Submitter(threading.Thread):
             "token":self.token
         }
         r = requests.post(url, data=data)
-        report(flag, self.correct_flag(r.text))
+        self.report(flag, self.correct_flag(r.text))
 
-    def report(self, flag, correct):
-        if correct:
-            msg = "Attack {ip}:{port} with payload {payload} success.".format(ip=flag.ip, port=flag.port, payload=payload)
-        else:
-            msg = "Attack {ip}:{port} with payload {payload} failed.".format(ip=flag.ip, port=flag.port, payload=payload)
+    def report(self, flag, resp):
+        msg = "Attack {ip}:{port} with payload {payload} {status}.".format(
+            ip=flag.ip, port=flag.port, payload=flag.payload, status=resp["status"])
+        print("Report: " + msg)
+        self.logger.info(msg)
+
 
     def add(self, flag, ip, port, payload):
         f = Flag(flag ,ip, port, payload)
         self.flagq.put(f)
 
     def run(self):
+        self.logger.info("Submitter start.")
         while self.isrun:
             try:
                 if self.flagq.empty():

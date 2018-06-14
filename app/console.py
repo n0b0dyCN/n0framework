@@ -1,6 +1,4 @@
-#!/usr/local/bin/python
-#-*- coding:utf-8 -*-
-
+# -*- coding: UTF-8 -*-
 import signal
 import cmd
 from prettytable import PrettyTable
@@ -98,6 +96,7 @@ class FrameworkShell(cmd.Cmd):
             for e in exps:
                 for ip in ips:
                     flag = e.attack(ip, port)
+                    print(flag)
                     self.flag_submitter.add(flag, ip, port, e.fname)
 
     def help_attack(self):

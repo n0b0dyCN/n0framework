@@ -2,8 +2,7 @@ import prettytable
 import os
 import imp
 
-from .util import safeGetAttr
-
+from .util import safeGetAttr, getLog
 
 class ExpManager:
     def __init__(self, exppath):
