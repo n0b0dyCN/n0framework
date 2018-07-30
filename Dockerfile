@@ -9,6 +9,8 @@ RUN apt-get -y install git \
 RUN pip install --upgrade pip
 RUN pip install requests prettytable pwntools pycrypto zio
 
+RUN pip install prompt_toolkit click fuzzyfinder pygments
+
 RUN pip install flask
 
 VOLUME /framelog

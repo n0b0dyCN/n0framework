@@ -3,6 +3,7 @@ import sys
 import re
 import requests
 import logging
+import shlex
 
 
 def genIPList(ips):
@@ -60,3 +61,15 @@ def getLog(name):
     handler.setFormatter(formatter)
     log.addHandler(handler)
     return log
+
+def parseline(line):
+    if isinstance(line, list):
+        return (line[0], line[1:])
+    try:
+        if ' ' in line:
+            cmd, args = line.split(' ', 1)
+            return (cmd, shlex.split(args))
+    except ValueError:
+        pass
+    return (line.strip(), None)
+
