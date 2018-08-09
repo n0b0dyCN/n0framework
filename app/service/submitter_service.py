@@ -8,6 +8,7 @@ import logging
 
 from .service import Service
 from core.flag import Flag
+from core.nlog import NLog
 
 class SubmitterService(Service, threading.Thread):
     def __init__(self, token=""):
@@ -15,6 +16,7 @@ class SubmitterService(Service, threading.Thread):
         self.flagq = Queue.Queue()
         self.isrun = True
         self.token = token
+        self.log = None
 
     def name(self):
         return "submitter"
@@ -24,8 +26,11 @@ class SubmitterService(Service, threading.Thread):
 
     def stop(self):
         self.isrun = False
+        self.log.info("Service submitter stopped.")
 
     def start(self, *args, **kwargs):
+        self.log = NLog(self.name)
+        self.log.info("Service submitter inited.")
         threading.Thread.start(self, *args, **kwargs)
 
     def make_completer(self):

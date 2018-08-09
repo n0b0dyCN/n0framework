@@ -6,6 +6,7 @@ from core.util import safeGetAttr, getLog, genIPList
 
 from .service import Service
 from core.gamebox import Gamebox
+from core.nlog import NLog
 
 class GameboxService(Service):
     def __init__(self): 
@@ -21,11 +22,14 @@ class GameboxService(Service):
         return "Gamebox service store gamebox information."
 
     def stop(self):
+        self.log.info("Service Gamebox stopped.")
         pass
 
     def start(self, *args, **kwargs):
+        self.log = NLog(self.name())
         self.loadGameboxs()
-        print("Gamebox service inited.")
+        msg = ("Service Gamebox inited.")
+        self.log.info(msg)
 
     def setDaemon(self, *args, **kwargs):
         pass
@@ -33,6 +37,7 @@ class GameboxService(Service):
     def make_parser(self, superparser):
         if not superparser:
             msg = "Need to give super parser"
+            self.log.error(msg)
         subp = superparser.add_parser(self.name(), help=self.description())
         subp.add_argument("action", type=str, help="service action")
 
@@ -43,6 +48,7 @@ class GameboxService(Service):
             self.loadGameboxs()
         else:
             msg = "Unrecognized action for service {}: {}".format(self.name(), action)
+            self.log.error(msg)
             print msg
 
     def loadGameboxs(self):
