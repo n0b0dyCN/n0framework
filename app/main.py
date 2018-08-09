@@ -69,7 +69,6 @@ class InteractiveShell:
                    commandReg=self.commandReg,
                    serviceReg=self.serviceReg
                   )
-        return False
 
     def get_kb(self):
         kb = KeyBindings()

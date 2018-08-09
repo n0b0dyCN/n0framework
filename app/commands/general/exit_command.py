@@ -16,7 +16,7 @@ class ExitCommand(Command):
 
     def action(self, args=None, **kwargs):
         if "serviceReg" in kwargs:
-            kwargs["serverReg"].stopall()
+            kwargs["serviceReg"].stop_all()
         sys.exit(0)
 
     def make_parser(self, **kwargs):

@@ -23,7 +23,6 @@ class SubmitterService(Service, threading.Thread):
         return "Service used to submit flag and generate log."
 
     def stop(self):
-        self.logger.info("Submitter stop.")
         self.isrun = False
 
     def start(self, *args, **kwargs):

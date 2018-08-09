@@ -50,6 +50,7 @@ class AttackCommand(Command):
             msg = "Service register needed."
             print msg
             return
+        print "Do attack"
         reg = kwargs["serviceReg"]
         gameboxs = reg.get("gamebox").getGameboxs()
         for gb in gameboxs:
@@ -62,7 +63,7 @@ class AttackCommand(Command):
 
     def attack_target(self, ip, port, exp, reg):
         flag = exp.attack(ip, port)
-        reg.get("submitter").add(flag, ip, port, name)
+        reg.get("submitter").add(flag, ip, port, exp.name)
 
     def make_parser(self, **kwargs):
         parser = CommandArgParser()
