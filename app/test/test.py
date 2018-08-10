@@ -1,9 +1,24 @@
-from __future__ import unicode_literals
+import multiprocessing
+import time
 
-from prompt_toolkit import PromptSession
-from prompt_toolkit.completion import WordCompleter
+class A():
+    def __init__(self, i):
+        super(A, self).__init__()
+        self.i = i
 
-c = WordCompleter(['aaa', 'bbb', 'bbc'])
-p = PromptSession(message='>>> ', completer=c)
-while True:
-    print p.prompt()
+    def run(t):
+        time.sleep(10-t)
+        print(t)
+        return t
+
+
+def main():
+    pool = multiprocessing.Pool(processes=10)
+    x = lambda t: A.run(t)
+    processes = [pool.apply_async(x, [i]) for i in range(10)]
+    for p in processes:
+        print p.get(timeout=5)
+    pass
+
+if __name__ == '__main__':
+    main()

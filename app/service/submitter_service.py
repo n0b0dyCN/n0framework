@@ -5,17 +5,22 @@ import Queue
 import threading
 from time import sleep
 import logging
+from ConfigParser import ConfigParser
 
 from .service import Service
 from core.flag import Flag
 from core.nlog import NLog
 
 class SubmitterService(Service, threading.Thread):
-    def __init__(self, token=""):
+    def __init__(self):
         threading.Thread.__init__(self,name="Submitter")
+        gc = ConfigParser()
+        gc.read("/app/config/general.cfg")
+        self.token = gc.get("GENERAL", "FLAG_TOKEN")
+
         self.flagq = Queue.Queue()
         self.isrun = True
-        self.token = token
+        #self.token = token
         self.log = None
 
     def name(self):
@@ -29,7 +34,7 @@ class SubmitterService(Service, threading.Thread):
         self.log.info("Service submitter stopped.")
 
     def start(self, *args, **kwargs):
-        self.log = NLog(self.name)
+        self.log = NLog(self.name())
         self.log.info("Service submitter inited.")
         threading.Thread.start(self, *args, **kwargs)
 
@@ -50,24 +55,25 @@ class SubmitterService(Service, threading.Thread):
             print self.description()
         else:
             msg = "Unrecognized action for service {}: {}".format(self.name(), action)
+            self.log.error(msg)
 
     def run(self):
-        print("Submitter start running.")
+        self.log.info("Submitter start running.")
         while self.isrun:
             try:
-                if self.flagq.empty():
-                    sleep(3)
-                else:
+                if not self.flagq.empty():
                     flag = self.flagq.get()
                     self.submit(flag)
             except Exception as e:
                 msg = str(e)
+                self.log.error(e)
+                #print(msg)
 
     def correct_flag(self, r):
         return {"status":"correct"}
 
     def submit(self, flag):
-        url = "https://www.n0b0dycn.me"
+        url = "http://127.0.0.1:8099/"
         data = {
             "flag":flag.flag,
             "token":self.token
@@ -78,7 +84,8 @@ class SubmitterService(Service, threading.Thread):
     def report(self, flag, resp):
         msg = "Attack {ip}:{port} with payload {payload} {status}.".format(
             ip=flag.ip, port=flag.port, payload=flag.payload, status=resp["status"])
-        print("Report: " + msg)
+        print(msg)
+        self.log.info("Report: " + msg)
 
 
     def add(self, flag, ip, port, payload):

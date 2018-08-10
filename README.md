@@ -17,6 +17,8 @@ Use `help` instruction to see what we support.
 ### Basic usage:
 Run command `service all start` first to init all services.
 The single command `attack` will attack all gameboxes of all teams of all exps.
+To stop auto attack, use `attack stop`;
+If new exploit is added, use `service exploit reload` and just type all after the prompt to reload all exploits.
 To see currrent exploits, use `service exploit show`.
 To see current gameboxes, use `service gamebox show`.
 

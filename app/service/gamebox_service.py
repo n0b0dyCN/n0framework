@@ -10,8 +10,11 @@ from core.nlog import NLog
 
 class GameboxService(Service):
     def __init__(self): 
+        gc = ConfigParser()
+        gc.read("/app/config/general.cfg")
+        confpath = gc.get("GENERAL", "GAMEBOX_CONFIG")
         self.cfg = ConfigParser()
-        confpath="/app/config/gamebox.cfg"
+        #confpath="/app/config/gamebox.cfg"
         self.cfg.read(confpath)
         self.gameboxs = []
 
@@ -27,9 +30,9 @@ class GameboxService(Service):
 
     def start(self, *args, **kwargs):
         self.log = NLog(self.name())
-        self.loadGameboxs()
         msg = ("Service Gamebox inited.")
         self.log.info(msg)
+        self.loadGameboxs()
 
     def setDaemon(self, *args, **kwargs):
         pass

@@ -1,12 +1,43 @@
 from __future__ import unicode_literals
 import sys
 import shlex
+import copy
+import threading
+import time
 
 from prompt_toolkit.completion import WordCompleter
 
 from ..command import Command
 from ..command_arg_parser import CommandArgParser
 from core.util import genIPList, parseline
+
+class AttackThread(threading.Thread):
+    def __init__(self, reg):
+        threading.Thread.__init__(self)
+        self.isrun = True
+        self.reg = reg
+
+    def stop(self):
+        self.isrun = False
+
+    def run(self):
+        while self.isrun:
+            gameboxs = self.reg.get("gamebox").getGameboxs()
+            for gb in gameboxs:
+                exps = self.reg.get("exploit").getExpByTarget(gb.name)
+                ips = genIPList(gb.getIP())
+                port = gb.getPort()
+                for ip in ips:
+                    for e in exps:
+                        self.attack_target(ip, port, e, self.reg)
+            time.sleep(10)
+
+    def attack_target(self, ip, port, exp, reg):
+        ee = exp.Exploit()
+        ee.set(ip=ip, port=port, submitter=reg.get("submitter"))
+        ee.setDaemon(True)
+        ee.start()
+
 
 
 class AttackWordCompleter(WordCompleter):
@@ -37,6 +68,7 @@ class AttackWordCompleter(WordCompleter):
 
 class AttackCommand(Command):
     def __init__(self):
+        self.attack_thread = None
         pass
 
     def name(self):
@@ -50,8 +82,26 @@ class AttackCommand(Command):
             msg = "Service register needed."
             print msg
             return
-        print "Do attack"
         reg = kwargs["serviceReg"]
+        if args == None or args.action == "restart":
+            if args != None:
+                self.attack_thread.stop()
+            self.attack_thread = AttackThread(reg)
+            self.attack_thread.setDaemon(True)
+            self.attack_thread.start()
+        elif args.action == "stop":
+            self.attack_thread.stop()
+        elif args.action == "start":
+            if self.attack_thread and self.attack_thread.isrun:
+                print "Attack already started."
+            else:
+                self.attack_thread = AttackThread(reg)
+                self.attack_thread.setDaemon(True)
+                self.attack_thread.start()
+        else:
+            msg = "Unknown command {}".format(args.action)
+            print msg
+        return
         gameboxs = reg.get("gamebox").getGameboxs()
         for gb in gameboxs:
             exps = reg.get("exploit").getExpByTarget(gb.name)
@@ -62,15 +112,13 @@ class AttackCommand(Command):
                     self.attack_target(ip, port, e, reg)
 
     def attack_target(self, ip, port, exp, reg):
-        flag = exp.attack(ip, port)
-        reg.get("submitter").add(flag, ip, port, exp.name)
+        ee = exp.Exploit()
+        ee.set(ip=ip, port=port, submitter=reg.get("submitter"))
+        ee.start()
 
     def make_parser(self, **kwargs):
         parser = CommandArgParser()
-        parser.add_argument("--team", action="store", dest="team")
-        parser.add_argument("--exp", action="store", dest="exp")
-        parser.add_argument("--ip", action="store", dest="ip")
-        parser.add_argument("--gamebox", action="store", dest="gamebox")
+        parser.add_argument("action", type=str, help="service action")
         return parser
 
     def get_actions(self):

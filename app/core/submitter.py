@@ -28,6 +28,9 @@ class Submitter(threading.Thread):
         self.logger.info("Submitter stop.")
         self.isrun = False
 
+    def start(self, *args, **kwargs):
+        threading.Thread.start(self)
+
     def submit(self, flag):
         url = "https://www.n0b0dycn.me"
         data = {
