@@ -15,12 +15,24 @@ root@626d325b64af:/app# ./main.py
 Use `help` instruction to see what we support.
 
 ### Basic usage:
+To build docker, run:
+```
+docker build -t n0b0dy:framework .
+```
+To run docker, run:
+```
+./run-docker.sh
+```
+
+
 Run command `service all start` first to init all services.
 The single command `attack` will attack all gameboxes of all teams of all exps.
 To stop auto attack, use `attack stop`;
 If new exploit is added, use `service exploit reload` and just type all after the prompt to reload all exploits.
 To see currrent exploits, use `service exploit show`.
 To see current gameboxes, use `service gamebox show`.
+
+To add exploit, put your *python* script in folder `exploit`.
 
 ## CHANGE LOG 2018.6.16
 To support auto completion to each command and customize each command's parameters, I decided to migrate the main framework from python native lib 'cmd' to 'python prompt toolkit'.
